@@ -6,6 +6,7 @@ export default function Home() {
     <div className="spce-y-4">
       <h1>Hi</h1>
       <Button>Rakib</Button>
+      <Button>Kabir</Button>
       <Button>Nixon</Button>
     </div>
   );
