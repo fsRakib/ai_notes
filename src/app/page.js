@@ -10,7 +10,7 @@ export default function Home() {
   const createUser = useMutation(api.user.createUser);
 
   useEffect(() => {
-    user&&CheckUser();
+    user&&CheckUser()
   },[user]);
 
   const CheckUser = async () => {
@@ -24,10 +24,11 @@ export default function Home() {
   };
 
   return (
-    <div className="spce-y-4">
-      <h1>Hi</h1>
+    <div className="spce-y-5">
+      {/* <h1>Hi</h1>
       <Button>Rakib</Button>
-      <UserButton />
+      <UserButton /> */} b   
     </div>
-  );
+  )
 }
+ 
