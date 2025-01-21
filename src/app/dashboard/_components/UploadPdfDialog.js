@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useMutation } from "convex/react";
+import { useAction, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Loader2Icon } from "lucide-react";
 import uuid4 from "uuid4";
@@ -22,10 +22,12 @@ function UploadPdfDialog({ children }) {
   const generateUploadUrl = useMutation(api.fileStorage.generateUploadUrl);
   const addFileEntry = useMutation(api.fileStorage.AddFileEntryToDb);
   const getFileZUrl = useMutation(api.fileStorage.getFileUrl);
+  const embeddDocument = useAction(api.myActions.ingest);
   const { user } = useUser();
   const [file, setFile] = useState();
   const [loading, setLoading] = useState(false);
   const [fileName, setFileName] = useState();
+  const [open, setOpen] = useState(false);
 
   const OnFileSelect = (event) => {
     setFile(event.target.files[0]);
@@ -50,16 +52,32 @@ function UploadPdfDialog({ children }) {
       fileId: fileId,
       storageId: storageId,
       fileName: fileName ?? "Untitled file",
-      fileUrl:fileUrl,
+      fileUrl: fileUrl,
       createdBy: user?.primaryEmailAddress?.emailAddress,
     });
-    console.log(res);
+    // console.log(res);
 
+    //API call to fetch PDF process data
+    const APIresponse = await fetch("/api/pdf-loader?pdfUrl=" + fileUrl, {
+      method: "GET",
+    });
+    const data = await APIresponse.json();
+    console.log(data.result);
+    await embeddDocument({
+      splitText: data.result,
+      fileId: fileId,
+    });
+    // console.log(embeddResult);
     setLoading(false);
+    setOpen(false);
   };
   return (
-    <Dialog>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+    <Dialog open={open}>
+      <DialogTrigger asChild>
+        <Button onClick={() => setOpen(true)} className="w-full">
+          +Upload PDF File
+        </Button>
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Upload Pdf File</DialogTitle>
@@ -89,7 +107,7 @@ function UploadPdfDialog({ children }) {
               Close
             </Button>
           </DialogClose>
-          <Button onClick={OnUpload}>
+          <Button onClick={OnUpload} disabled={loading}>
             {loading ? <Loader2Icon className="animate-spin" /> : "Upload"}
           </Button>
         </DialogFooter>
