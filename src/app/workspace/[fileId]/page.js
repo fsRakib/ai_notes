@@ -4,7 +4,9 @@ import React, { useEffect } from "react";
 import WorkspaceHeader from "./_components/WorkspaceHeader";
 import PdfViewer from "./_components/PdfViewer";
 import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
+// import { api } from "@/convex/_generated/api";
+import TextEditor from "./_components/TextEditor";
+import { api } from "../../../../convex/_generated/api";
 
 function Workspace() {
   const { fileId } = useParams();
@@ -20,7 +22,9 @@ function Workspace() {
     <div>
       <WorkspaceHeader />
       <div className="grid grid-cols-2 gap-5">
-        <div>{/* Text editor */}</div>
+        <div>{/* Text editor */}
+          <TextEditor />
+        </div>
         <div>
           {/* PDF viewer */}
           <PdfViewer fileUrl={fileInfo?.fileUrl}/>
