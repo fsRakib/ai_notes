@@ -46,10 +46,10 @@ function EditorExtension({ editor, setLink }) {
       });
 
     const PROMPT =
-      "For question: " +
+      "For question :" +
       selectedText +
       " and with the given content as answer," +
-      "please give appropriate answer in HTML format. The answer content is: " +
+      " please give appropriate answer in HTML format. The answer content is: " +
       AllUnformattedAns;
 
     const AiModelResult = await chatSession.sendMessage(PROMPT);
@@ -62,7 +62,7 @@ function EditorExtension({ editor, setLink }) {
       .replace("```", "");
     const AllText = editor.getHTML();
     editor.commands.setContent(
-      AllText + "<p><strong>Answer: </strong>" + FinalAns + "</p>"
+      AllText + "<p> <strong>Answer: </strong>" + FinalAns + "</p>"
     );
   };
   return (
