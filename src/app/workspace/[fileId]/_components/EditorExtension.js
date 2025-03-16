@@ -17,6 +17,7 @@ import React from "react";
 import { useParams } from "next/navigation";
 import { api } from "../../../../../convex/_generated/api";
 import { chatSession } from "../../../../../config/AIModel";
+import { toast } from "sonner";
 
 function EditorExtension({ editor, setLink }) {
   const { fileId } = useParams();
@@ -24,6 +25,8 @@ function EditorExtension({ editor, setLink }) {
   const SearchAI = useAction(api.myActions.search);
 
   const onAiClick = async () => {
+    toast("AI is getting your answer...")
+
     const selectedText = editor.state.doc.textBetween(
       editor.state.selection.from,
       editor.state.selection.to,
