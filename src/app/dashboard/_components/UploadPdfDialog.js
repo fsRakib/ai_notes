@@ -17,8 +17,9 @@ import { api } from "../../../../convex/_generated/api";
 import { Loader2Icon } from "lucide-react";
 import uuid4 from "uuid4";
 import { useUser } from "@clerk/nextjs";
+import { toast } from "sonner";
 
-function UploadPdfDialog({ children }) {
+function UploadPdfDialog({ children, isMaxFile }) {
   const generateUploadUrl = useMutation(api.fileStorage.generateUploadUrl);
   const addFileEntry = useMutation(api.fileStorage.AddFileEntryToDb);
   const getFileZUrl = useMutation(api.fileStorage.getFileUrl);
@@ -34,47 +35,62 @@ function UploadPdfDialog({ children }) {
   };
   const OnUpload = async () => {
     setLoading(true);
-    // Step 1: Get a short-lived upload URL
-    const postUrl = await generateUploadUrl();
-    // Step 2: POST the file to the URL
-    const result = await fetch(postUrl, {
-      method: "POST",
-      headers: { "Content-Type": file?.type },
-      body: file,
-    });
 
-    const { storageId } = await result.json();
-    console.log("StorageId", storageId);
-    const fileId = uuid4();
-    const fileUrl = await getFileZUrl({ storageId: storageId });
-    // Step 3: Save the newly allocated storage id to the database
-    const res = await addFileEntry({
-      fileId: fileId,
-      storageId: storageId,
-      fileName: fileName ?? "Untitled file",
-      fileUrl: fileUrl,
-      createdBy: user?.primaryEmailAddress?.emailAddress,
-    });
-    // console.log(res);
+    try {
+      // Step 1: Get a short-lived upload URL
+      const postUrl = await generateUploadUrl();
+      // Step 2: POST the file to the URL
+      const result = await fetch(postUrl, {
+        method: "POST",
+        headers: { "Content-Type": file?.type },
+        body: file,
+      });
 
-    //API call to fetch PDF process data
-    const APIresponse = await fetch("/api/pdf-loader?pdfUrl=" + fileUrl, {
-      method: "GET",
-    });
-    const data = await APIresponse.json();
-    console.log(data.result);
-    await embeddDocument({
-      splitText: data.result,
-      fileId: fileId,
-    });
-    // console.log(embeddResult);
-    setLoading(false);
-    setOpen(false);
+      const { storageId } = await result.json();
+      console.log("StorageId", storageId);
+      const fileId = uuid4();
+      const fileUrl = await getFileZUrl({ storageId: storageId });
+      // Step 3: Save the newly allocated storage id to the database
+      const res = await addFileEntry({
+        fileId: fileId,
+        storageId: storageId,
+        fileName: fileName ?? "Untitled file",
+        fileUrl: fileUrl,
+        createdBy: user?.primaryEmailAddress?.emailAddress,
+      });
+      // console.log(res);
+
+      //API call to fetch PDF process data
+      const APIresponse = await fetch("/api/pdf-loader?pdfUrl=" + fileUrl, {
+        method: "GET",
+      });
+      const data = await APIresponse.json();
+      console.log(data.result);
+      await embeddDocument({
+        splitText: data.result,
+        fileId: fileId,
+      });
+      // console.log(embeddResult);
+      // setLoading(false);
+      setOpen(false);
+
+      toast("File is ready...");
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast("Upload failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
+
   return (
-    <Dialog open={open}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button onClick={() => setOpen(true)} className="w-full">
+        <Button
+          onClick={() => setOpen(true)}
+          disabled={isMaxFile}
+          className="w-full"
+        >
           +Upload PDF File
         </Button>
       </DialogTrigger>
