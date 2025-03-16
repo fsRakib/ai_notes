@@ -1,8 +1,8 @@
+"use client";
 import Placeholder from "@tiptap/extension-placeholder";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import React, { useCallback } from "react";
-import EditorExtension from "./EditorExtension";
+import React, { useCallback, useEffect } from "react";
 import Highlight from "@tiptap/extension-highlight";
 import Underline from "@tiptap/extension-underline";
 import Heading from "@tiptap/extension-heading";
@@ -10,14 +10,25 @@ import TextAlign from "@tiptap/extension-text-align";
 import ListItem from "@tiptap/extension-list-item";
 import BulletList from "@tiptap/extension-bullet-list";
 import Link from "@tiptap/extension-link";
+import EditorExtension from "./EditorExtension";
+import { useQuery } from "convex/react";
+import { api } from "../../../../../convex/_generated/api";
 
-function TextEditor() {
+function TextEditor({ fileId }) {
+  const notes = useQuery(api.notes.GetNotes, {
+    fileId: fileId,
+  });
+
+  console.log(notes);
+
   const editor = useEditor({
     extensions: [
       StarterKit,
       Placeholder.configure({
         placeholder: "Start typing...",
+        immediatelyRender: false,
       }),
+
       Highlight.configure({ multicolor: true }),
       Underline,
       Heading.configure({
@@ -108,6 +119,10 @@ function TextEditor() {
       },
     },
   });
+
+  useEffect(() => {
+    editor && editor.commands.setContent(notes);
+  }, [notes && editor]);
 
   const setLink = useCallback(() => {
     const previousUrl = editor.getAttributes("link").href;

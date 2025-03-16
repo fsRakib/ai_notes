@@ -1,4 +1,4 @@
-import { useAction } from "convex/react";
+import { useAction, useMutation } from "convex/react";
 import {
   AlignCenter,
   AlignJustify,
@@ -18,14 +18,17 @@ import { useParams } from "next/navigation";
 import { api } from "../../../../../convex/_generated/api";
 import { chatSession } from "../../../../../config/AIModel";
 import { toast } from "sonner";
+import { useUser } from "@clerk/nextjs";
 
 function EditorExtension({ editor, setLink }) {
   const { fileId } = useParams();
 
   const SearchAI = useAction(api.myActions.search);
+  const saveNotes = useMutation(api.notes.AddNotes);
+  const { user } = useUser();
 
   const onAiClick = async () => {
-    toast("AI is getting your answer...")
+    toast("AI is getting your answer...");
 
     const selectedText = editor.state.doc.textBetween(
       editor.state.selection.from,
@@ -63,10 +66,17 @@ function EditorExtension({ editor, setLink }) {
       .replace("```", "")
       .replace("html", "")
       .replace("```", "");
+      
     const AllText = editor.getHTML();
     editor.commands.setContent(
       AllText + "<p> <strong>Answer: </strong>" + FinalAns + "</p>"
     );
+
+    saveNotes({
+      notes: editor.getHTML(),
+      fileId: fileId,
+      createdBy: user?.primaryEmailAddress?.emailAddress,
+    });
   };
   return (
     editor && (
