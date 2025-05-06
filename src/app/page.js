@@ -10,8 +10,8 @@ export default function Home() {
   const createUser = useMutation(api.user.createUser);
 
   useEffect(() => {
-    user&&CheckUser();
-  },[user]);
+    user && CheckUser();
+  }, [user]);
 
   const CheckUser = async () => {
     const result = await createUser({
@@ -20,11 +20,10 @@ export default function Home() {
       imageUrl: user?.imageUrl,
     });
     console.log(result);
-    
   };
 
   return (
-    <div className="spce-y-4">
+    <div className="spce-y-5">
       <h1>Hi</h1>
       <Button>Rakib</Button>
       <UserButton />
