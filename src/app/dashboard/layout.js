@@ -1,20 +1,29 @@
-import React from "react";
+ import React from "react";
 import SideBar from "./_components/SideBar";
 import Header from "./_components/Header";
 
-function DashboardLayout({ children }) {
+export default function DashboardLayout({ children }) {
   return (
-    <div>
-      <div className="md:w-64 h-screen fixed "><SideBar/></div>
-      <div className="md:ml-64 ">
-        <Header />
-        <div className="p-10">
-          {children}
-        </div>
+    <div className="flex h-screen">
+      {/* Sidebar - fixed and scrollable on md+ screens */}
+      <aside className="hidden md:block fixed h-full w-64 bg-white border-r overflow-y-auto">
+        <SideBar />
+      </aside>
+
+      {/* Main content area - shifted right by sidebar width */}
+      <main className="flex flex-col md:ml-64 w-full h-full ">
         
-      </div>
+        {/* Header - auto height */}
+        <header className=" ">
+          <Header />
+        </header>
+
+        {/* Content - takes all remaining space */}
+        <section className="p-4 flex-1 overflow-y-auto ">
+          {children}
+        </section>
+      </main>
     </div>
   );
 }
 
-export default DashboardLayout;

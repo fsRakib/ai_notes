@@ -16,7 +16,7 @@ function Dashboard() {
   console.log(fileList);
 
   return (
-    <div>
+    <div className="p-4 ">
       <h2 className="font-medium text-3xl">Workspace</h2>
 
       <div className=" grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 mt-10">

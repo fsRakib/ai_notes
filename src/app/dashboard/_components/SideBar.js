@@ -2,7 +2,7 @@
 import React from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Layout, Shield } from "lucide-react";
+import { BotMessageSquareIcon, ChartAreaIcon, ChartBar, Layout, Shield } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import UploadPdfDialog from "./UploadPdfDialog";
 import { useUser } from "@clerk/nextjs";
@@ -35,6 +35,14 @@ function SideBar() {
         >
           <Layout />
           <h2>Workspace</h2>
+        </div>
+      </Link>
+      <Link href="/dashboard/chat">
+        <div
+          className={`flex gap-2 items-center p-3 mt-1 hover:bg-slate-100 cursor-pointer ${path == "/dashboard/upgrade" && "bg-slate-200"}`}
+        >
+          <BotMessageSquareIcon />
+          <h2>Chat</h2>
         </div>
       </Link>
       <Link href="/dashboard/upgrade">
