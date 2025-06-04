@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
-const token = "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";
+const token = process.env.OPENAI_API_TOKEN;
 const endpoint = "https://models.github.ai/inference";
 const model = "openai/gpt-4.1";
 

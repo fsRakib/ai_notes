@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+
+    // "baseUrl": ".",
+    // "paths": {
+    //   "@/*": ["./*"]
+    // }
+  }
+}
+// {
+//   "compilerOptions": {
+//     "baseUrl": ".", // <--- This is important!
+//     "paths": {
+//       "@/*": ["src/*"]
+//     }
+//   }
+// }
