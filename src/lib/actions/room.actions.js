@@ -8,7 +8,7 @@ import { getAccessType, parseStringify } from "@/lib/utils";
 
 // Create new document
 export const createDocument = async ({ userId, email, fileName, roomId }) => {
-  // const roomId = nanoid();
+//console.log("room action", { userId, email, fileName, roomId });
 
   try {
     const metadata = {
@@ -27,7 +27,7 @@ export const createDocument = async ({ userId, email, fileName, roomId }) => {
       usersAccesses,
       defaultAccesses: [], // [] means private room
     });
-    console.log("created room:", room);
+    //console.log("created room:", room);
 
     revalidatePath("/");
     return parseStringify(room);
@@ -39,15 +39,15 @@ export const createDocument = async ({ userId, email, fileName, roomId }) => {
 // Get one document
 export const getDocument = async ({ roomId, userId }) => {
   try {
-    // console.log("roomId (fileId):", roomId);
-    // console.log("userId (email):", userId);
+   // console.log("roomId (fileId):", roomId);
+   // console.log("userId (email):", userId);
 
     // https://liveblocks.io/docs/api-reference/liveblocks-node#get-rooms-roomId
     const room = await liveblocks.getRoom(roomId);
-    // console.log("get room:", room);
+  //  console.log("get room:", room);
 
     const hasAccess = Object.keys(room.usersAccesses).includes(userId);
-    console.log("hasAccess: ", hasAccess);
+   // console.log("hasAccess: ", hasAccess);
     if (!hasAccess) {
       throw new Error("You do not have access to this document.");
     }

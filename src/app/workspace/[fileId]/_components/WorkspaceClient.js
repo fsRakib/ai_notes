@@ -7,7 +7,7 @@ import WorkspaceHeader from "./WorkspaceHeader";
 import PdfViewer from "./PdfViewer";
 import TextEditor from "./TextEditor";
 import { RoomProvider, ClientSideSuspense } from "@liveblocks/react/suspense";
-import { Loader } from "./Loader";
+import Loader from "@/components/Loader";
 
 export default function WorkspaceClient({
   fileId,
@@ -15,15 +15,25 @@ export default function WorkspaceClient({
   usersData,
   currentUserType,
 }) {
-  const fileInfo = useQuery(api.fileStorage.GeFileRecord, {
-    fileId,
+  console.log("WorkspaceClient fileId:", fileId);
+  const fileInfo = useQuery(api.fileStorage.GetFileRecord, {
+    fileId
   });
 
+  // useEffect(() => {
+  //   console.log("fileInfo: ", fileInfo);
+  // }, [fileInfo]);
   useEffect(() => {
-    console.log("fileInfo: ", fileInfo);
+    if (fileInfo === undefined) {
+      console.warn("fileInfo is undefined. Waiting for data or query failed.");
+    } else if (fileInfo === null) {
+      console.error("fileInfo is null: no matching file found in DB.");
+    } else {
+      console.log("Loaded fileInfo: ", fileInfo);
+    }
   }, [fileInfo]);
-  console.log("WorkspaceClient fileName:", fileInfo?.fileName);
-  console.log("WorkspaceClient roomId:", fileId);
+  
+
   console.log("WorkspaceClient roomMetadata:", room.metadata);
   console.log("WorkspaceClient users:", usersData);
   console.log("WorkspaceClient currentUserType:", currentUserType);
@@ -45,7 +55,7 @@ export default function WorkspaceClient({
             <div>
               <PdfViewer fileUrl={fileInfo?.fileUrl} />
             </div>
-          </div>{" "}
+          </div>
         </ClientSideSuspense>
       </RoomProvider>
     </div>

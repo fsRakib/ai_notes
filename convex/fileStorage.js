@@ -35,7 +35,7 @@ export const getFileUrl = mutation({
   },
 });
 
-export const GeFileRecord = query({
+export const GetFileRecord = query({
   args: {
     fileId: v.string(),
   },
@@ -44,7 +44,8 @@ export const GeFileRecord = query({
       .query("pdfFiles")
       .filter((q) => q.eq(q.field("fileId"), args.fileId))
       .collect();
-    console.log(result);
+
+    console.log("fileStorage.js result: ", result);
 
     return result[0];
   },
@@ -59,11 +60,33 @@ export const GetUserFiles = query({
       return;
     }
 
-
     const result = await ctx.db
       .query("pdfFiles")
       .filter((q) => q.eq(q.field("createdBy"), args?.userEmail))
       .collect();
     return result;
+  },
+});
+
+export const updateFileName = mutation({
+  args: {
+    fileId: v.string(),
+    newFileName: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const record = await ctx.db
+      .query("pdfFiles")
+      .filter((q) => q.eq(q.field("fileId"), args.fileId))
+      .collect();
+
+    if (!record.length) {
+      throw new Error("File not found");
+    }
+
+    await ctx.db.patch(record[0]._id, {
+      fileName: args.newFileName,
+    });
+
+    return "Updated successfully";
   },
 });

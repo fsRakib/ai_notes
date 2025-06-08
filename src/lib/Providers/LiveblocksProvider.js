@@ -4,11 +4,8 @@ import {
   ClientSideSuspense,
   LiveblocksProvider,
 } from "@liveblocks/react/suspense";
-import {
-  getClerkUsers,
-  getDocumentUsers,
-} from "@/lib/actions/user.actions.js";
-import { Loader } from "@/app/workspace/[fileId]/_components/Loader";
+import { getClerkUsers, getDocumentUsers } from "@/lib/actions/user.actions.js";
+import Loader from "@/components/Loader";
 
 export default function Provider({ children }) {
   const { user: clerkUser } = useUser();

@@ -6,7 +6,7 @@ export async function POST(req) {
   const clerkUser = await currentUser();
 
   if (!clerkUser) {
-    return new Response("Unauthorized", { status: 401 });
+    return new Response("Unauthorized, Please log in", { status: 401 });
   }
 
   const user = {
@@ -19,7 +19,7 @@ export async function POST(req) {
       color: getUserColor(clerkUser.id),
     },
   };
-
+  //console.log("liveblocks-auth user:", user);
   const { status, body } = await liveblocks.identifyUser(
     {
       userId: user.info.email,

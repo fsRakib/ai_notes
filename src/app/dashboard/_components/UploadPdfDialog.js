@@ -18,6 +18,7 @@ import { Loader2Icon } from "lucide-react";
 import uuid4 from "uuid4";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
+import { createDocument } from "@/lib/actions/room.actions";
 
 function UploadPdfDialog({ children, isMaxFile }) {
   const generateUploadUrl = useMutation(api.fileStorage.generateUploadUrl);
@@ -69,6 +70,13 @@ function UploadPdfDialog({ children, isMaxFile }) {
       await embeddDocument({
         splitText: data.result,
         fileId: fileId,
+      });
+
+      const room = await createDocument({
+        userId: user?.id,
+        email: user?.primaryEmailAddress?.emailAddress,
+        fileName,
+        roomId: fileId,
       });
       // console.log(embeddResult);
       // setLoading(false);

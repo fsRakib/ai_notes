@@ -1,0 +1,107 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.main {
+  position: fixed;
+  inset: 0;
+  backdrop-filter: blur(6px);
+  background-color: rgba(255, 255, 255, 0.3); /* translucent white */
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.s2, .s1 {
+  position: absolute;
+  height: 100px;
+  width: 100px;
+  background-color: transparent;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.s1 {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.bigcon {
+  position: absolute;
+  height: 95px;
+  width: 95px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  animation: bigcon 2s infinite linear;
+  animation-delay: 0.25s;
+}
+
+.b {
+  border-radius: 50%;
+  position: absolute;
+}
+
+.s {
+  width: 25px;
+  height: 25px;
+  animation: small 2s infinite ease;
+  box-shadow: 0px 2px rgba(0, 0, 0, 0.3);
+  background-color: #000000; /* black */
+}
+
+.s:nth-child(1) { top: 0%; left: 0%; }
+.s:nth-child(2) { top: 0%; right: 0%; }
+.s:nth-child(3) { bottom: 0%; right: 0%; }
+.s:nth-child(4) { bottom: 0%; left: 0%; }
+
+.big {
+  width: 20px;
+  height: 20px;
+  border-radius: 15px;
+  box-shadow: 
+    0px 0px 10px #00000066, 
+    0px 0px 20px #00000033, 
+    0px 0px 30px #00000022;
+  z-index: 1;
+  background-color: #000000; /* black */
+  animation: bigball 1s infinite linear;
+}
+
+.sb1 { animation-delay: -1.75s; }
+.sb6 { animation-delay: -1.5s; }
+.sb2 { animation-delay: -1.25s; }
+.sb7 { animation-delay: -1s; }
+.sb3 { animation-delay: -0.75s; }
+.sb8 { animation-delay: -0.5s; }
+.sb4 { animation-delay: -0.25s; }
+.sb5 { animation-delay: 0s; }
+
+@keyframes bigcon {
+  0% {
+    transform: translate(-50%, -50%) rotate(45deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(405deg);
+  }
+}
+
+@keyframes small {
+  0%, 25%, 100% {
+    transform: scale(1);
+    background-color: #000000;
+  }
+  10% {
+    transform: scale(1.3);
+    background-color: #222222;
+  }
+  15% {
+    transform: scale(1);
+  }
+}

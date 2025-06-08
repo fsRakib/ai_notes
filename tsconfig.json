@@ -28,7 +28,7 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"
-, "src/app/workspace/[fileId]/_components/Loader.js", "src/app/workspace/[fileId]/_components/ShareModal.js", "src/app/workspace/[fileId]/_components/Collaborator.js", "src/app/workspace/[fileId]/_components/UserTypeSelector.js"  ],
+, "src/app/workspace/[fileId]/_components/Loader.js", "src/app/workspace/[fileId]/_components/ShareModal.js", "src/app/workspace/[fileId]/_components/Collaborator.js", "src/app/workspace/[fileId]/_components/UserTypeSelector.js", "src/app/workspace/[fileId]/_components/ActiveCollaborators.js"  ],
   "exclude": [
     "node_modules"
   ]

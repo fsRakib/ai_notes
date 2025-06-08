@@ -13,16 +13,20 @@ import Link from "@tiptap/extension-link";
 import EditorExtension from "./EditorExtension";
 import { useQuery } from "convex/react";
 import { api } from "../../../../../convex/_generated/api";
+import {
+  FloatingToolbar,
+  useLiveblocksExtension,
+} from "@liveblocks/react-tiptap";
+import { Threads } from "../_components/Threads";
 
 function TextEditor({ fileId }) {
   const notes = useQuery(api.notes.GetNotes, {
     fileId: fileId,
   });
-
-  console.log(notes);
-
+  const liveblocks = useLiveblocksExtension();
   const editor = useEditor({
     extensions: [
+      liveblocks,
       StarterKit,
       Placeholder.configure({
         placeholder: "Start typing...",
@@ -46,16 +50,12 @@ function TextEditor({ fileId }) {
         protocols: ["http", "https"],
         isAllowedUri: (url, ctx) => {
           try {
-            // construct URL
             const parsedUrl = url.includes(":")
               ? new URL(url)
               : new URL(`${ctx.defaultProtocol}://${url}`);
-
-            // use default validation
             if (!ctx.defaultValidate(parsedUrl.href)) {
               return false;
             }
-
             // disallowed protocols
             const disallowedProtocols = ["ftp", "file", "mailto"];
             const protocol = parsedUrl.protocol.replace(":", "");
@@ -63,8 +63,6 @@ function TextEditor({ fileId }) {
             if (disallowedProtocols.includes(protocol)) {
               return false;
             }
-
-            // only allow protocols specified in ctx.protocols
             const allowedProtocols = ctx.protocols.map((p) =>
               typeof p === "string" ? p : p.scheme
             );
@@ -83,8 +81,6 @@ function TextEditor({ fileId }) {
             if (disallowedDomains.includes(domain)) {
               return false;
             }
-
-            // all checks have passed
             return true;
           } catch {
             return false;
@@ -92,12 +88,10 @@ function TextEditor({ fileId }) {
         },
         shouldAutoLink: (url) => {
           try {
-            // construct URL
             const parsedUrl = url.includes(":")
               ? new URL(url)
               : new URL(`https://${url}`);
 
-            // only auto-link if the domain is not in the disallowed list
             const disallowedDomains = [
               "example-no-autolink.com",
               "another-no-autolink.com",
@@ -115,32 +109,33 @@ function TextEditor({ fileId }) {
 
     editorProps: {
       attributes: {
-        class: "focus:outline-none h-screen p-5",
+        class: "focus:outline-none h-screen p-5 mt-5",
       },
     },
   });
 
+  // useEffect(() => {
+  //   editor && editor.commands.setContent(notes);
+  // }, [notes && editor]);
   useEffect(() => {
-    editor && editor.commands.setContent(notes);
-  }, [notes && editor]);
-
+    if (editor && notes) {
+      editor.commands.setContent(notes.content || "");
+    }
+  }, [editor, notes]);
   const setLink = useCallback(() => {
     const previousUrl = editor.getAttributes("link").href;
     const url = window.prompt("URL", previousUrl);
 
-    // cancelled
     if (url === null) {
       return;
     }
 
-    // empty
     if (url === "") {
       editor.chain().focus().extendMarkRange("link").unsetLink().run();
 
       return;
     }
 
-    // update link
     try {
       editor
         .chain()
@@ -158,6 +153,8 @@ function TextEditor({ fileId }) {
       <EditorExtension editor={editor} setLink={setLink} />
       <div className="overflow-scroll h-[88vh]">
         <EditorContent editor={editor} />
+        <Threads editor={editor} />
+        <FloatingToolbar editor={editor} />
       </div>
     </div>
   );

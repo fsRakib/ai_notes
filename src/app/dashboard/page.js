@@ -1,6 +1,6 @@
 "use client";
 import { useUser } from "@clerk/nextjs";
-import { useQueries, useQuery } from "convex/react";
+import { useQuery } from "convex/react";
 import React from "react";
 import { api } from "../../../convex/_generated/api";
 import Image from "next/image";
@@ -13,7 +13,7 @@ function Dashboard() {
     userEmail: user?.primaryEmailAddress?.emailAddress,
   });
 
-  console.log(fileList);
+  console.log("fileList", fileList);
 
   return (
     <div className="p-4 ">

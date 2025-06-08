@@ -4,7 +4,7 @@ import {
   FloatingComposer,
   FloatingThreads,
 } from "@liveblocks/react-tiptap";
-import { Editor } from "@tiptap/react";
+
 
 export function Threads({ editor }) {
   const { threads } = useThreads({ query: { resolved: false } });

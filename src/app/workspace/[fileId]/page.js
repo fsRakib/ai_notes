@@ -1,37 +1,45 @@
-"use client";
-import { useParams } from "next/navigation";
-import React, { useEffect } from "react";
-import WorkspaceHeader from "./_components/WorkspaceHeader";
-import PdfViewer from "./_components/PdfViewer";
-import { useQuery } from "convex/react";
-// import { api } from "@/convex/_generated/api";
-import TextEditor from "./_components/TextEditor";
-import { api } from "../../../../convex/_generated/api";
+import { redirect } from "next/navigation";
+import { getDocument } from "@/lib/actions/room.actions";
+import { currentUser } from "@clerk/nextjs/server";
+import { getClerkUsers } from "@/lib/actions/user.actions";
+import WorkspaceClient from "./_components/WorkspaceClient";
 
-function Workspace() {
-  const { fileId } = useParams();
-  const fileInfo = useQuery(api.fileStorage.GeFileRecord, {
-    fileId: fileId,
+export default async function WorkspacePage({ params }) {
+  const { fileId } = await params;
+ // console.log("WorkspacePage fileId:", fileId);
+  const clerkUser = await currentUser();
+  if (!clerkUser) redirect("/");
+
+  const room = await getDocument({
+    roomId: fileId,
+    userId: clerkUser.emailAddresses[0].emailAddress,
   });
+  //console.log("page.js room:", room);
 
-  useEffect(() => {
-    console.log(fileInfo);
-  }, [fileInfo]);
+  const userIds = Object.keys(room.usersAccesses);
+  //console.log("page.js userIds:", userIds);
+  const users = await getClerkUsers({ userIds });
+  //console.log("page.js users:", users);
 
+  const usersData = users.map((user) => ({
+    ...user,
+    userType: room.usersAccesses[user.email]?.includes("room:write")
+      ? "editor"
+      : "viewer",
+  }));
+  //console.log("page.js usersData:", usersData);
+  const currentUserType = room.usersAccesses[
+    clerkUser.emailAddresses[0].emailAddress
+  ].includes("room:write")
+    ? "editor"
+    : "viewer";
+  //console.log("page.js currentUserType:", currentUserType);
   return (
-    <div>
-      <WorkspaceHeader fileName={fileInfo?.fileName}/>
-      <div className="grid grid-cols-2 gap-5">
-        <div>{/* Text editor */}
-          <TextEditor fileId={fileId}/>
-        </div>
-        <div>
-          {/* PDF viewer */}
-          <PdfViewer fileUrl={fileInfo?.fileUrl}/>
-        </div>
-      </div>
-    </div>
+    <WorkspaceClient
+      fileId={fileId}
+      room={room}
+      usersData={usersData}
+      currentUserType={currentUserType}
+    />
   );
 }
-
-export default Workspace;
