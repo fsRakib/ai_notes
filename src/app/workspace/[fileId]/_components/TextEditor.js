@@ -117,11 +117,13 @@ function TextEditor({ fileId }) {
   // useEffect(() => {
   //   editor && editor.commands.setContent(notes);
   // }, [notes && editor]);
+
   useEffect(() => {
     if (editor && notes) {
-      editor.commands.setContent(notes.content || "");
+      editor.commands.setContent(notes);
     }
   }, [editor, notes]);
+  
   const setLink = useCallback(() => {
     const previousUrl = editor.getAttributes("link").href;
     const url = window.prompt("URL", previousUrl);
@@ -154,7 +156,7 @@ function TextEditor({ fileId }) {
       <div className="overflow-scroll h-[88vh]">
         <EditorContent editor={editor} />
         <Threads editor={editor} />
-        <FloatingToolbar editor={editor} />
+        {editor && <FloatingToolbar editor={editor} />}
       </div>
     </div>
   );

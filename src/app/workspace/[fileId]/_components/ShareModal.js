@@ -29,13 +29,13 @@ export const ShareModal = ({
   const [userType, setUserType] = useState("viewer");
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  console.log(
-    "ShareModal rendered with :",
-    roomId,
-    collaborators,
-    creatorId,
-    currentUserType
-  );
+  // console.log(
+  //   "ShareModal rendered with :",
+  //   roomId,
+  //   collaborators,
+  //   creatorId,
+  //   currentUserType
+  // );
   const shareDocumentHandler = async () => {
     setLoading(true);
 

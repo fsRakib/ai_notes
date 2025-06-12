@@ -66,11 +66,19 @@ function EditorExtension({ editor, setLink }) {
       .replace("```", "")
       .replace("html", "")
       .replace("```", "");
-      
-    const AllText = editor.getHTML();
-    editor.commands.setContent(
-      AllText + "<p> <strong>Answer: </strong>" + FinalAns + "</p>"
-    );
+
+    // const AllText = editor.getHTML();
+    // editor.commands.setContent(
+    //   AllText + "<p> <strong>Answer: </strong>" + FinalAns + "</p>"
+    // );
+
+    editor
+      .chain()
+      .focus()
+      .insertContent(
+        `<p><strong>Question:</strong> ${selectedText}</p><p><strong>Answer:</strong> ${FinalAns}</p>`
+      )
+      .run();
 
     saveNotes({
       notes: editor.getHTML(),

@@ -13,10 +13,12 @@ export const ingest = action({
   handler: async (ctx, args) => {
     await ConvexVectorStore.fromTexts(
       args.splitText, //Array
-      args.fileId, //string
+      // args.fileId, //string
+      args.splitText.map(() => ({ fileId: args.fileId })),
+
 
       new GoogleGenerativeAIEmbeddings({
-        apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY,
+        apiKey: "AIzaSyCCWQLkRwew7URK-b_FZpP2J2RPgtr_blA",
         model: "text-embedding-004", // 768 dimensions
         taskType: TaskType.RETRIEVAL_DOCUMENT,
         title: "Document title",
@@ -43,7 +45,7 @@ export const search = action({
       { ctx }
     );
 
-    const resultOne = await await vectorStore.similaritySearch(args.query, 1);
+    const resultOne = await vectorStore.similaritySearch(args.query, 1);
     console.log("ResultOne: ", resultOne);
 
     return JSON.stringify(resultOne);
