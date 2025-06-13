@@ -21,12 +21,15 @@ export default async function WorkspacePage({ params }) {
   const users = await getClerkUsers({ userIds });
   //console.log("page.js users:", users);
 
-  const usersData = users.map((user) => ({
+  const usersData = users
+  .filter((user) => user && user.email) // Ensure valid users
+  .map((user) => ({
     ...user,
     userType: room.usersAccesses[user.email]?.includes("room:write")
       ? "editor"
       : "viewer",
   }));
+
   //console.log("page.js usersData:", usersData);
   const currentUserType = room.usersAccesses[
     clerkUser.emailAddresses[0].emailAddress
