@@ -166,3 +166,32 @@ export const removeCollaborator = async ({ roomId, email }) => {
     console.error("An error occurred while sharing the document:", error);
   }
 };
+
+
+export const getSharedRooms = async (email) => {
+  try {
+    const result = await liveblocks.getRooms({ userId: email });
+
+    // Debug log
+    console.log("liveblocks.getRooms result:", result);
+
+    const rooms = Array.isArray(result) ? result : result?.data || [];
+
+    if (!Array.isArray(rooms)) {
+      console.error("Expected array but got:", typeof rooms, rooms);
+      return [];
+    }
+
+    const filtered = rooms.filter(
+      (room) =>
+        Object.keys(room.usersAccesses).includes(email) &&
+        room.metadata.email !== email
+    );
+
+    return parseStringify(filtered);
+  } catch (err) {
+    console.error("Failed to fetch shared rooms:", err);
+    return [];
+  }
+};
+
