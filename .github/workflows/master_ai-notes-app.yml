@@ -25,10 +25,6 @@ jobs:
       - name: Build Next.js app
         run: npm run build
 
-      - name: Zip full project (excluding .git and node_modules if needed)
-        run: zip -r release.zip . -x '*.git*'
-      
-
       - name: Login to Azure using Service Principal
         uses: azure/login@v2
         with:
@@ -39,4 +35,4 @@ jobs:
         with:
           app-name: 'ai-notes-app'
           slot-name: 'Production'
-          package: release.zip
+          package: .
