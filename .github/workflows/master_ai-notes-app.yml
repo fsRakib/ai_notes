@@ -1,4 +1,4 @@
-name: Build and deploy Next.js SSR app to Azure Web App - ai-notes-app
+name: Deploy Next.js SSR app to Azure Web App - ai-notes-app
 
 on:
   push:
@@ -28,17 +28,6 @@ jobs:
 
       - name: Build Next.js app
         run: npm run build
-
-      - name: Upload artifacts (optional backup)
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-output
-          path: |
-            .next
-            public
-            package.json
-            package-lock.json
-            node_modules
 
       - name: Login to Azure
         uses: azure/login@v2
