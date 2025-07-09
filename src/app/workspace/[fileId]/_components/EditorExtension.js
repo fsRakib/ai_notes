@@ -19,8 +19,11 @@ import { api } from "../../../../../convex/_generated/api";
 import { chatSession } from "../../../../../config/AIModel";
 import { toast } from "sonner";
 import { useUser } from "@clerk/nextjs";
+import { Eye, EyeOff } from "lucide-react";
+import { Button } from "@/components/ui/button"; // Assuming you're using shadcn/ui
 
-function EditorExtension({ editor, setLink }) {
+
+function EditorExtension({ editor, setLink, pdfVisible, setPdfVisible }) {
   const { fileId } = useParams();
 
   const SearchAI = useAction(api.myActions.search);
@@ -198,6 +201,14 @@ function EditorExtension({ editor, setLink }) {
               className={"hover:text-blue-600"}
             >
               <Sparkle />
+            </button>
+            
+            <button
+              onClick={() => setPdfVisible(!pdfVisible)}
+              className="hover:text-blue-600 "
+              title={pdfVisible ? "Hide PDF Viewer" : "Show PDF Viewer"}
+            >
+              {pdfVisible ? <EyeOff /> : <Eye />}
             </button>
           </div>
         </div>

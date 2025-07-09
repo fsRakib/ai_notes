@@ -1,11 +1,13 @@
 import React from "react";
 
 function PdfViewer({ fileUrl }) {
-  console.log(fileUrl);
-
   return (
-    <div>
-    <iframe src={fileUrl+"#toolbar=0"} height="90vh" width="100%" className="h-[90vh]" />
+    <div className="relative h-[90vh]">
+      <iframe
+        src={`${fileUrl}#toolbar=0`}
+        className="w-full h-full border rounded-lg shadow-sm"
+        title="PDF Viewer"
+      />
     </div>
   );
 }

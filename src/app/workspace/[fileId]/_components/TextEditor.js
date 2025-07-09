@@ -19,7 +19,7 @@ import {
 } from "@liveblocks/react-tiptap";
 import { Threads } from "../_components/Threads";
 
-function TextEditor({ fileId }) {
+function TextEditor({ fileId, pdfVisible, setPdfVisible }) {
   const notes = useQuery(api.notes.GetNotes, {
     fileId: fileId,
   });
@@ -123,7 +123,7 @@ function TextEditor({ fileId }) {
       editor.commands.setContent(notes);
     }
   }, [editor, notes]);
-  
+
   const setLink = useCallback(() => {
     const previousUrl = editor.getAttributes("link").href;
     const url = window.prompt("URL", previousUrl);
@@ -152,7 +152,12 @@ function TextEditor({ fileId }) {
 
   return (
     <div>
-      <EditorExtension editor={editor} setLink={setLink} />
+      <EditorExtension
+        editor={editor}
+        setLink={setLink}
+        pdfVisible={pdfVisible}
+        setPdfVisible={setPdfVisible}
+      />
       <div className="overflow-scroll h-[88vh]">
         <EditorContent editor={editor} />
         <Threads editor={editor} />

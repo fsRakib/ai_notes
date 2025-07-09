@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../../../../convex/_generated/api";
 import WorkspaceHeader from "./WorkspaceHeader";
@@ -8,6 +8,8 @@ import PdfViewer from "./PdfViewer";
 import TextEditor from "./TextEditor";
 import { RoomProvider, ClientSideSuspense } from "@liveblocks/react/suspense";
 import Loader from "@/components/Loader";
+import { Button } from "@/components/ui/button";
+import { Maximize2, Minimize2 } from "lucide-react"; // Import icons from lucide-react
 
 export default function WorkspaceClient({
   fileId,
@@ -15,14 +17,10 @@ export default function WorkspaceClient({
   usersData,
   currentUserType,
 }) {
-  console.log("WorkspaceClient fileId:", fileId);
-  const fileInfo = useQuery(api.fileStorage.GetFileRecord, {
-    fileId
-  });
+  const [pdfVisible, setPdfVisible] = useState(true);
 
-  // useEffect(() => {
-  //   console.log("fileInfo: ", fileInfo);
-  // }, [fileInfo]);
+  const fileInfo = useQuery(api.fileStorage.GetFileRecord, { fileId });
+
   useEffect(() => {
     if (fileInfo === undefined) {
       console.warn("fileInfo is undefined. Waiting for data or query failed.");
@@ -32,13 +30,9 @@ export default function WorkspaceClient({
       console.log("Loaded fileInfo: ", fileInfo);
     }
   }, [fileInfo]);
-  
 
-  console.log("WorkspaceClient roomMetadata:", room.metadata);
-  console.log("WorkspaceClient users:", usersData);
-  console.log("WorkspaceClient currentUserType:", currentUserType);
   return (
-    <div>
+    <div className="relative">
       <RoomProvider id={fileId}>
         <ClientSideSuspense fallback={<Loader />}>
           <WorkspaceHeader
@@ -48,13 +42,18 @@ export default function WorkspaceClient({
             users={usersData}
             currentUserType={currentUserType}
           />
-          <div className="grid grid-cols-2 gap-5">
+
+          <div
+            className={`grid ${pdfVisible ? "grid-cols-2" : "grid-cols-1"} gap-5`}
+          >
             <div>
-              <TextEditor fileId={fileId} />
+              <TextEditor
+                fileId={fileId}
+                pdfVisible={pdfVisible}
+                setPdfVisible={setPdfVisible}
+              />
             </div>
-            <div>
-              <PdfViewer fileUrl={fileInfo?.fileUrl} />
-            </div>
+            {pdfVisible && <PdfViewer fileUrl={fileInfo?.fileUrl} />}
           </div>
         </ClientSideSuspense>
       </RoomProvider>

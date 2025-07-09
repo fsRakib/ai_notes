@@ -8,6 +8,7 @@ import { useMutation } from "convex/react";
 import { api } from "../../.../../../../../convex/_generated/api";
 import { useRoom } from "@liveblocks/react";
 import { updateDocument } from "@/lib/actions/room.actions";
+import { SquarePen } from "lucide-react";
 
 function WorkspaceHeader({
   fileName,
@@ -69,8 +70,16 @@ function WorkspaceHeader({
   }, [editing]);
 
   return (
-    <div className="p-4 flex justify-between shadow-md">
-      <Image src={"/logo.png"} alt="logo" width={50} height={50} />
+    <div className="p-2 flex justify-between shadow-lg">
+      <Image
+        src={"/logo.png"}
+        alt="logo"
+        width={50}
+        height={50}
+        className="ml-5 cursor-pointer"
+        onClick={() => (window.location.href = "/dashboard")}
+        style={{ minWidth: 50 }}
+      />
 
       <div
         ref={containerRef}
@@ -85,11 +94,11 @@ function WorkspaceHeader({
             onChange={(e) => setDocumentTitle(e.target.value)}
             onKeyDown={(e) => updateTitleHandler(e)}
             disabled={!editing}
-            className="min-w-[78px] flex-1 border-none bg-transparent px-0 text-left text-base font-semibold leading-[24px] focus-visible:ring-0 focus-visible:ring-offset-0 disabled:text-black sm:text-xl md:text-center"
+            className="min-w-[60px] flex-1 border-none bg-transparent px-0 text-left text-base font-semibold leading-[24px] focus-visible:ring-0 focus-visible:ring-offset-0 disabled:text-black sm:text-xl md:text-center"
           />
         ) : (
           <>
-            <p className="line-clamp-1 border-dark-400 text-base font-semibold leading-[24px] sm:pl-0 sm:text-xl">
+            <p className="line-clamp-1 border-dark-400 max-w-[600px] text-base font-semibold leading-[24px] sm:pl-0 sm:text-xl">
               {documentTitle}
             </p>
           </>
@@ -97,14 +106,14 @@ function WorkspaceHeader({
 
         {/* Edit icon trigger */}
         {currentUserType === "editor" && !editing && (
-          <Image
-            src="/assets/icons/edit.svg"
-            alt="edit"
-            width={24}
-            height={24}
+          <button
+            type="button"
             onClick={() => setEditing(true)}
-            className="cursor-pointer"
-          />
+            className="cursor-pointer p-1"
+            aria-label="Edit title"
+          >
+            <SquarePen className="text-orange-500" width={24} height={24} />
+          </button>
         )}
 
         {/* View only user indicator */}
@@ -117,7 +126,7 @@ function WorkspaceHeader({
       </div>
 
       {/* Collaborators & Actions */}
-      <div className="flex  justify-end gap-2 sm:gap-3 ">
+      <div className="flex  justify-end gap-2 sm:gap-5 mr-8">
         <ActiveCollaborators />
         <ShareModal
           roomId={roomId}
@@ -126,7 +135,21 @@ function WorkspaceHeader({
           currentUserType={currentUserType}
         />
         <SignedIn>
-          <UserButton />
+          <UserButton
+            appearance={{
+              elements: {
+                userButtonAvatarBox: {
+                  width: "2.5rem",
+                  height: "2.5rem",
+                },
+                userButtonTrigger: {
+                  "&:focus, &:active": {
+                    boxShadow: "none",
+                  },
+                },
+              },
+            }}
+          />
         </SignedIn>
       </div>
     </div>

@@ -31,10 +31,10 @@ function SideBar() {
       </div>
       <Link href="/dashboard">
         <div
-          className={`flex gap-2 items-center p-3 mt-5 hover:bg-slate-100 cursor-pointer ${path == "/dashboard" && "bg-slate-200"}`}
+          className={` flex gap-2 items-center p-3 mt-5 hover:bg-slate-100 cursor-pointer ${path == "/dashboard" && "bg-slate-200"}`}
         >
           <Layout />
-          <h2>Workspace</h2>
+          <h2 >Workspace</h2>
         </div>
       </Link>
       <Link href="/dashboard/chat">
