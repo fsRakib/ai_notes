@@ -37,7 +37,7 @@ export const search = action({
   handler: async (ctx, args) => {
     const vectorStore = new ConvexVectorStore(
       new GoogleGenerativeAIEmbeddings({
-        apiKey: "AIzaSyCCWQLkRwew7URK-b_FZpP2J2RPgtr_blA",
+        apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY,
         model: "text-embedding-004", // 768 dimensions
         taskType: TaskType.RETRIEVAL_DOCUMENT,
         title: "Document title",
@@ -45,7 +45,7 @@ export const search = action({
       { ctx }
     );
 
-    const resultOne = await vectorStore.similaritySearch(args.query, 1);
+    const resultOne = await vectorStore.similaritySearch(args.query, 5);
     console.log("ResultOne: ", resultOne);
 
     return JSON.stringify(resultOne);

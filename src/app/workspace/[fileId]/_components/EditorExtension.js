@@ -13,7 +13,7 @@ import {
   Underline,
 } from "lucide-react";
 import React from "react";
-
+import { marked } from "marked";
 import { useParams } from "next/navigation";
 import { api } from "../../../../../convex/_generated/api";
 import { chatSession } from "../../../../../config/AIModel";
@@ -22,13 +22,15 @@ import { useUser } from "@clerk/nextjs";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button"; // Assuming you're using shadcn/ui
 
-
 function EditorExtension({ editor, setLink, pdfVisible, setPdfVisible }) {
   const { fileId } = useParams();
-
   const SearchAI = useAction(api.myActions.search);
   const saveNotes = useMutation(api.notes.AddNotes);
   const { user } = useUser();
+
+  async function convertMarkdownToHTML(markdown) {
+    return marked.parse(markdown); // returns HTML string
+  }
 
   const onAiClick = async () => {
     toast("AI is getting your answer...");
@@ -38,60 +40,67 @@ function EditorExtension({ editor, setLink, pdfVisible, setPdfVisible }) {
       editor.state.selection.to,
       " "
     );
-    console.log("selected text: ", selectedText);
+    console.log("selected text:", selectedText);
 
+    // Step 1: Search relevant content from vector DB
     const result = await SearchAI({
       query: selectedText,
       fileId: fileId,
     });
+    console.log("Search Result:", result);
 
-    const UnformatedAns = JSON.parse(result);
-    // console.log("Unformated Ans: ", result);
+    const UnformattedAns = JSON.parse(result);
+    const AllUnformattedAns =
+      UnformattedAns?.map((el) => el.pageContent).join(" ") || "";
 
-    let AllUnformattedAns = "";
-    UnformatedAns &&
-      UnformatedAns.forEach((element) => {
-        AllUnformattedAns += element.pageContent;
-      });
+    // Step 2: Send to LLM with markdown-only prompt
+    const PROMPT = `
+You are given a question and supporting content extracted from a document.
 
-    const PROMPT =
-      "For question :" +
-      selectedText +
-      " and with the given content as answer," +
-      " please give appropriate answer in HTML format. The answer content is: " +
-      AllUnformattedAns;
+Task:
+- Provide a clean, well-structured markdown answer.
+- Group key points logically using headings or bullet points.
+- Clearly state who is responsible (if applicable).
+- Respond ONLY in valid markdown — no HTML, no backticks, no raw code blocks.
+
+Question: ${selectedText}
+
+Content: ${AllUnformattedAns}
+`;
 
     const AiModelResult = await chatSession.sendMessage(PROMPT);
-    console.log("AiModelResult: ", AiModelResult.response.text());
+    const markdownRaw = await AiModelResult.response.text();
+    console.log("AI Markdown Output:", markdownRaw);
 
-    const FinalAns = AiModelResult.response
-      .text()
-      .replace("```", "")
-      .replace("html", "")
-      .replace("```", "");
+    // Step 3: Minimal cleanup 
+    const markdownCleaned = markdownRaw
+      .replace(/```(markdown|md)?/gi, "") 
+      .replace(/&nbsp;/g, " ")
+      .trim();
 
-    // const AllText = editor.getHTML();
-    // editor.commands.setContent(
-    //   AllText + "<p> <strong>Answer: </strong>" + FinalAns + "</p>"
-    // );
+    // Step 4: Convert Markdown to HTML (TipTap needs HTML)
+    const mdToHtml = await convertMarkdownToHTML(markdownCleaned);
 
+    // Step 5: Insert clean output into the editor
     editor
       .chain()
       .focus()
       .insertContent(
-        `<p><strong>Question:</strong> ${selectedText}</p><p><strong>Answer:</strong> ${FinalAns}</p>`
+        `<p><strong>Question:</strong> ${selectedText}</p><p><strong>Answer:</strong></p>${mdToHtml}`
       )
       .run();
 
+    // Step 6: Save note to DB
     saveNotes({
       notes: editor.getHTML(),
       fileId: fileId,
       createdBy: user?.primaryEmailAddress?.emailAddress,
     });
   };
+
   return (
     editor && (
-      <div className="p-5">
+      <div className="p-5 ProseMirror">
         <div className="control-group">
           <div className="button-group flex gap-3">
             <button
@@ -190,6 +199,7 @@ function EditorExtension({ editor, setLink, pdfVisible, setPdfVisible }) {
             >
               <List />
             </button>
+
             <button
               onClick={setLink}
               className={editor.isActive("link") ? "text-blue-600" : ""}
@@ -202,7 +212,7 @@ function EditorExtension({ editor, setLink, pdfVisible, setPdfVisible }) {
             >
               <Sparkle />
             </button>
-            
+
             <button
               onClick={() => setPdfVisible(!pdfVisible)}
               className="hover:text-blue-600 "

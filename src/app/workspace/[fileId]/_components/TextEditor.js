@@ -32,7 +32,8 @@ function TextEditor({ fileId, pdfVisible, setPdfVisible }) {
         placeholder: "Start typing...",
         immediatelyRender: false,
       }),
-
+      BulletList,
+      ListItem,
       Highlight.configure({ multicolor: true }),
       Underline,
       Heading.configure({
@@ -41,8 +42,6 @@ function TextEditor({ fileId, pdfVisible, setPdfVisible }) {
       TextAlign.configure({
         types: ["heading", "paragraph"],
       }),
-      BulletList,
-      ListItem,
       Link.configure({
         openOnClick: true,
         autolink: true,
@@ -109,14 +108,11 @@ function TextEditor({ fileId, pdfVisible, setPdfVisible }) {
 
     editorProps: {
       attributes: {
-        class: "focus:outline-none h-screen p-5 mt-5",
+        class:
+          "focus:outline-none h-screen p-5 mt-5  [&_h1]:my-3 [&_h2]:my-2 [&_h3]:my-1",
       },
     },
   });
-
-  // useEffect(() => {
-  //   editor && editor.commands.setContent(notes);
-  // }, [notes && editor]);
 
   useEffect(() => {
     if (editor && notes) {
@@ -158,10 +154,10 @@ function TextEditor({ fileId, pdfVisible, setPdfVisible }) {
         pdfVisible={pdfVisible}
         setPdfVisible={setPdfVisible}
       />
-      <div className="overflow-scroll h-[88vh]">
+      <div className="tiptap overflow-scroll h-[88vh]">
         <EditorContent editor={editor} />
         <Threads editor={editor} />
-        {editor && <FloatingToolbar editor={editor} />}
+        {/* {editor && <FloatingToolbar editor={editor} />} */}
       </div>
     </div>
   );

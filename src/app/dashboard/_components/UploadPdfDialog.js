@@ -66,7 +66,10 @@ function UploadPdfDialog({ children, isMaxFile }) {
         method: "GET",
       });
       const data = await APIresponse.json();
-      console.log(data.result);
+      console.log(
+        "/dashboard/_components/UploadPdfDialog.js -Extracted Split Text: ",
+        data.result
+      );
       await embeddDocument({
         splitText: data.result,
         fileId: fileId,

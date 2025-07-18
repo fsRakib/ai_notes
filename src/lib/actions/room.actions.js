@@ -173,7 +173,7 @@ export const getSharedRooms = async (email) => {
     const result = await liveblocks.getRooms({ userId: email });
 
     // Debug log
-    console.log("liveblocks.getRooms result:", result);
+    //console.log("liveblocks.getRooms result:", result);
 
     const rooms = Array.isArray(result) ? result : result?.data || [];
 

@@ -18,7 +18,6 @@ export default function DashboardClient({ sharedRooms }) {
       {/* Created Documents */}
       <div className="mt-10 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-10 gap-5">
         {fileList === undefined ? (
-          // Dynamically show placeholders based on previously uploaded files if possible
           Array.from({
             length: (sharedRooms?.length || 0) > 0 ? sharedRooms.length : 3,
           }).map((_, idx) => (
@@ -29,7 +28,10 @@ export default function DashboardClient({ sharedRooms }) {
           ))
         ) : fileList?.length > 0 ? (
           fileList.map((file) => (
-            <div className="shadow-lg p-4 rounded-lg  items-center border-red-400 border-2 ">
+            <div
+              key={file.fileId}
+              className="shadow-lg p-4 rounded-lg  items-center border-red-400 border-2 "
+            >
               <Link
                 href={`/workspace/${file.fileId}`}
                 className="flex flex-col items-center group w-full"
@@ -60,7 +62,7 @@ export default function DashboardClient({ sharedRooms }) {
                     height={50}
                     alt="shared file"
                   />
-                  <h2 className="mt-3 font-medium text-lg truncate">
+                  <h2 className="mt-3 font-medium text-lg w-full text-center truncate">
                     {room.metadata?.title || "Untitled"}
                   </h2>
                 </div>

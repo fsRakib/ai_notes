@@ -60,6 +60,27 @@ body {
     font-size: 1rem;
   }
 
+
+.tiptap ul {
+  list-style-type: disc;
+  padding-left: 1.25rem; /* this is important for indentation */
+  margin: 1rem 0; /* adjust margins as you like */
+}
+
+.tiptap ol {
+  list-style-type: decimal;
+  padding-left: 1.25rem;
+  margin: 1rem 0;
+}
+
+.tiptap li {
+  margin-bottom: 0.25rem; /* spacing between list items */
+}
+
+.tiptap li p {
+  margin: 0; /* you already set this, just ensure it */
+}
+
   /* Code and preformatted text styles */
   code {
     background-color: var(--purple-light);
@@ -227,4 +248,26 @@ body {
   .anchored-threads {
     display: none;
   }
+}
+
+/* styles/globals.css or tailwind base layer */
+.ProseMirror p {
+  margin-block: 0.4rem; /* reduce spacing */
+  line-height: 1.5; /* cleaner line spacing */
+}
+.prose ul {
+  list-style-type: disc;
+  padding-left: 1.25rem;
+}
+
+.prose ol {
+  list-style-type: decimal;
+  padding-left: 1.25rem;
+}
+@keyframes blink {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+.animate-blink {
+  animation: blink 1s step-end infinite;
 }
