@@ -13,7 +13,6 @@ import {
   Underline,
 } from "lucide-react";
 import React from "react";
-import { marked } from "marked";
 import { useParams } from "next/navigation";
 import { api } from "../../../../../convex/_generated/api";
 import { chatSession } from "../../../../../config/AIModel";
@@ -27,41 +26,28 @@ function EditorExtension({ editor, setLink, pdfVisible, setPdfVisible }) {
   const saveNotes = useMutation(api.notes.AddNotes);
   const { user } = useUser();
 
-  async function convertMarkdownToHTML(markdown) {
-    return marked.parse(markdown); // returns HTML string
-  }
-
-  // Fixed typeWriterEffect function with proper bold heading support
-
   async function typeWriterEffect(editor, text, options = {}) {
     const { delay = 10, initialDelay = 50, lineDelay = 20 } = options;
 
     await new Promise((resolve) => setTimeout(resolve, initialDelay));
 
-    // Helper function for inserting bold content with typewriter effect
     async function insertBoldContentWithDelay(editor, text, delay) {
       try {
-        // Move cursor to current position and start bold formatting
         editor.chain().focus().run();
 
-        // Insert bold content using HTML approach for better compatibility
         const boldHtml = `<strong>${text}</strong>`;
 
-        // For typewriter effect with bold, we need to insert character by character
-        // while maintaining the bold formatting
         for (let i = 0; i < text.length; i++) {
-          // Insert each character wrapped in strong tags
           editor.commands.insertContent(`<strong>${text[i]}</strong>`);
           await new Promise((resolve) => setTimeout(resolve, delay));
         }
       } catch (error) {
         console.error("Bold insertion error:", error);
-        // Fallback: Insert complete bold text at once
+
         editor.commands.insertContent(`<strong>${text}</strong>`);
       }
     }
 
-    // Helper function for regular content insertion
     async function insertContentWithDelay(editor, text, delay) {
       for (let i = 0; i < text.length; i++) {
         editor.commands.insertContent(text[i]);
@@ -77,7 +63,6 @@ function EditorExtension({ editor, setLink, pdfVisible, setPdfVisible }) {
       const line = lines[i].trim();
 
       if (!line) {
-        // Handle empty lines
         if (inList) {
           editor.commands.enter();
           await new Promise((resolve) => setTimeout(resolve, lineDelay));
@@ -85,40 +70,30 @@ function EditorExtension({ editor, setLink, pdfVisible, setPdfVisible }) {
         continue;
       }
 
-      // FIXED: Better detection for bold headings
       const isBoldMarkdownHeading = /^\*\*(.+?)\*\*$/.test(line);
       const isColonHeading =
         line.endsWith(":") && !line.startsWith("-") && !line.startsWith("--");
       const isHeading = isBoldMarkdownHeading || isColonHeading;
 
       if (isHeading) {
-        // Exit list if we're in one
         if (inList) {
           editor.commands.toggleBulletList();
           inList = false;
           currentNestLevel = 0;
 
-          // Add extra line break after exiting list before heading
           editor.commands.enter();
           await new Promise((resolve) => setTimeout(resolve, lineDelay));
         }
 
-        // FIXED: Extract heading text properly
         let headingText;
         if (isBoldMarkdownHeading) {
-          // Extract text from **text** format
           headingText = line.replace(/^\*\*(.+?)\*\*$/, "$1").trim();
         } else {
-          // Remove colon from colon headings
           headingText = line.replace(/:$/, "").trim();
         }
 
-        //console.log("Processing heading:", headingText); // Debug log
-
-        // Insert heading with bold formatting
         await insertBoldContentWithDelay(editor, headingText, delay);
 
-        // Add line break if there are more lines
         if (i < lines.length - 1) {
           editor.commands.enter();
           await new Promise((resolve) => setTimeout(resolve, lineDelay));
@@ -126,14 +101,11 @@ function EditorExtension({ editor, setLink, pdfVisible, setPdfVisible }) {
         continue;
       }
 
-      // Handle list items (existing logic)
       const listMatch = line.match(/^(-+)\s/);
       const targetNestLevel = listMatch ? listMatch[1].length : 0;
 
       if (listMatch) {
-        // FIXED: Reset list state properly when starting new list
         if (!inList) {
-          // Ensure we're not in any previous formatting context
           editor.commands.clearNodes();
           editor.commands.toggleBulletList();
           inList = true;
@@ -142,7 +114,6 @@ function EditorExtension({ editor, setLink, pdfVisible, setPdfVisible }) {
           editor.commands.enter();
         }
 
-        // Adjust nesting level
         while (currentNestLevel < targetNestLevel) {
           editor.commands.sinkListItem("listItem");
           currentNestLevel++;
@@ -157,19 +128,15 @@ function EditorExtension({ editor, setLink, pdfVisible, setPdfVisible }) {
         continue;
       }
 
-      // Regular content
       if (inList) {
-        // Exit list for non-list content
         editor.commands.toggleBulletList();
         inList = false;
         currentNestLevel = 0;
 
-        // Add line break after exiting list
         editor.commands.enter();
         await new Promise((resolve) => setTimeout(resolve, lineDelay));
       }
 
-      // Insert regular paragraph content
       await insertContentWithDelay(editor, line, delay);
       if (i < lines.length - 1) {
         editor.commands.enter();
@@ -178,56 +145,97 @@ function EditorExtension({ editor, setLink, pdfVisible, setPdfVisible }) {
     }
   }
 
-  // Alternative approach - if the above doesn't work well, try this simpler version:
-  async function typeWriterEffectAlternative(editor, text, options = {}) {
-    const { delay = 10, initialDelay = 50, lineDelay = 20 } = options;
+  const [isAiLoading, setIsAiLoading] = React.useState(false);
 
-    await new Promise((resolve) => setTimeout(resolve, initialDelay));
+  const loadingMessages = [
+    "Just a sec...",
+    "Generating your response...",
+    "Thinking hard...",
+    "Almost there...",
+    "Processing your request...",
+    "Crafting the perfect answer...",
+    "Working on it...",
+    "Hang tight...",
+    "Computing magic...",
+    "Brewing your response...",
+  ];
 
-    const lines = text.split("\n");
+  const getRandomLoadingMessage = () => {
+    return loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
+  };
 
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
+  const startLoadingAnimation = (editor) => {
+    let messageStartPos = null;
+    let currentMessageLength = 0;
 
-      if (!line) continue;
+    const updateLoadingMessage = () => {
+      const message = getRandomLoadingMessage();
 
-      // Check if line is a bold heading
-      const boldMatch = line.match(/^\*\*(.+?)\*\*$/);
+      if (messageStartPos !== null && currentMessageLength > 0) {
+        const endPos = messageStartPos + currentMessageLength;
+        const transaction = editor.state.tr
+          .delete(messageStartPos, endPos)
+          .insertText(message, messageStartPos);
 
-      if (boldMatch) {
-        const headingText = boldMatch[1];
-
-        // Insert bold heading all at once (simpler approach)
-        editor.commands.insertContent(`<p><strong>${headingText}</strong></p>`);
+        editor.view.dispatch(transaction);
+        currentMessageLength = message.length;
       } else {
-        // Handle regular content and lists as before
-        await insertContentWithDelay(editor, line, delay);
-
-        if (i < lines.length - 1) {
-          editor.commands.enter();
-          await new Promise((resolve) => setTimeout(resolve, lineDelay));
-        }
+        messageStartPos = editor.state.selection.from;
+        editor.commands.insertContent(message);
+        currentMessageLength = message.length;
       }
 
-      await new Promise((resolve) => setTimeout(resolve, lineDelay));
-    }
-  }
+      setTimeout(() => {
+        const editorElement = editor.view.dom;
+        const textNodes = editorElement.querySelectorAll("p");
+        const lastParagraph = textNodes[textNodes.length - 1];
 
-  // Helper function (keep this in your component)
-  async function insertContentWithDelay(editor, text, delay) {
-    for (let i = 0; i < text.length; i++) {
-      editor.commands.insertContent(text[i]);
-      await new Promise((resolve) => setTimeout(resolve, delay));
-    }
-  }
+        if (lastParagraph && lastParagraph.textContent.trim() === message) {
+          lastParagraph.className = "";
 
-  const [isAiLoading, setIsAiLoading] = React.useState(false);
+          const text = lastParagraph.textContent;
+          lastParagraph.innerHTML = "";
+
+          text.split("").forEach((char, index) => {
+            const span = document.createElement("span");
+            span.textContent = char === " " ? "\u00A0" : char; // Use non-breaking space
+            span.className =
+              "inline-block text-blue-500 font-medium animate-bounce";
+            span.style.animationDelay = `${index * 0.1}s`;
+            span.style.animationDuration = "1s";
+            span.style.animationIterationCount = "infinite";
+            lastParagraph.appendChild(span);
+          });
+
+          // Add overall styling to the paragraph
+          lastParagraph.classList.add("italic");
+        }
+      }, 50);
+    };
+
+    updateLoadingMessage();
+    const interval = setInterval(updateLoadingMessage, 2000);
+
+    return {
+      interval,
+      cleanup: () => {
+        clearInterval(interval);
+        if (messageStartPos !== null && currentMessageLength > 0) {
+          const endPos = messageStartPos + currentMessageLength;
+          const transaction = editor.state.tr.delete(messageStartPos, endPos);
+          editor.view.dispatch(transaction);
+        }
+      },
+    };
+  };
 
   const onAiClick = async () => {
     if (isAiLoading) return;
 
     setIsAiLoading(true);
     toast("AI is getting your answer...");
+
+    let loadingAnimation = null;
 
     try {
       const selectedText = editor.state.doc.textBetween(
@@ -241,16 +249,14 @@ function EditorExtension({ editor, setLink, pdfVisible, setPdfVisible }) {
         return;
       }
 
-      // Insert question first
       editor
         .chain()
         .focus()
         .insertContent(
-          `<p><strong>Question:</strong> ${selectedText}</p><p><strong>Answer:<br/></strong></p>`
+          `<p><strong>Question:</strong> ${selectedText}</p><p><strong>Answer:<br/></p>`
         )
         .run();
-
-      // Step 1: Search relevant content from vector DB
+      loadingAnimation = startLoadingAnimation(editor);
       const result = await SearchAI({
         query: selectedText,
         fileId: fileId,
@@ -301,7 +307,6 @@ function EditorExtension({ editor, setLink, pdfVisible, setPdfVisible }) {
           error.message.includes("429") ||
           error.message.includes("Quota exceeded")
         ) {
-          // THIS IS WHERE TO PUT YOUR NEW ERROR MESSAGE
           toast.error(
             "AI usage limit reached. Free tier allows limited requests per minute. Please wait a moment before trying again."
           );
@@ -309,14 +314,17 @@ function EditorExtension({ editor, setLink, pdfVisible, setPdfVisible }) {
         }
         throw error;
       }
+      if (loadingAnimation) {
+        loadingAnimation.cleanup();
+        loadingAnimation = null;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 300));
 
-      // Minimal cleanup
       const markdownCleaned = markdownRaw
         .replace(/```(markdown|md)?/gi, "")
         .replace(/&nbsp;/g, " ")
         .trim();
 
-      // Apply typewriter effect
       await typeWriterEffect(editor, markdownCleaned);
 
       // Save the final content
@@ -329,6 +337,9 @@ function EditorExtension({ editor, setLink, pdfVisible, setPdfVisible }) {
       console.error("AI Error:", error);
       toast.error("Failed to get AI response. Please try again later.");
     } finally {
+      if (loadingAnimation) {
+        loadingAnimation.cleanup();
+      }
       setIsAiLoading(false);
     }
   };
