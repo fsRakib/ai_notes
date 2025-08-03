@@ -9,9 +9,9 @@ export const metadata = {
 
 export default function DashboardLayout({ children }) {
   return (
-    <div className="flex h-screen">
+    <div className="flex h-full">
       {/* Sidebar - fixed and scrollable on md+ screens */}
-      <aside className="hidden md:block fixed h-full w-64 bg-white border-r overflow-y-auto">
+      <aside className="hidden md:block fixed h-full w-64 bg-stone-100 ">
         <SideBar />
       </aside>
 

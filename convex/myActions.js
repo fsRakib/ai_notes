@@ -7,7 +7,7 @@ import { v } from "convex/values";
 
 export const ingest = action({
   args: {
-    splitText: v.any(),
+    splitText: v.array(v.string()),
     fileId: v.string(),
   },
   handler: async (ctx, args) => {
@@ -16,9 +16,8 @@ export const ingest = action({
       // args.fileId, //string
       args.splitText.map(() => ({ fileId: args.fileId })),
 
-
       new GoogleGenerativeAIEmbeddings({
-        apiKey: "AIzaSyCCWQLkRwew7URK-b_FZpP2J2RPgtr_blA",
+        apiKey: process.env.GOOGLE_API_KEY,
         model: "text-embedding-004", // 768 dimensions
         taskType: TaskType.RETRIEVAL_DOCUMENT,
         title: "Document title",
@@ -37,7 +36,7 @@ export const search = action({
   handler: async (ctx, args) => {
     const vectorStore = new ConvexVectorStore(
       new GoogleGenerativeAIEmbeddings({
-        apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY,
+        apiKey: process.env.GOOGLE_API_KEY,
         model: "text-embedding-004", // 768 dimensions
         taskType: TaskType.RETRIEVAL_DOCUMENT,
         title: "Document title",
@@ -46,8 +45,6 @@ export const search = action({
     );
 
     const resultOne = await vectorStore.similaritySearch(args.query, 5);
-    console.log("ResultOne: ", resultOne);
-
     return JSON.stringify(resultOne);
   },
 });

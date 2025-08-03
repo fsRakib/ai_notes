@@ -271,3 +271,18 @@ body {
 .animate-blink {
   animation: blink 1s step-end infinite;
 }
+/* Add to your global CSS */
+.typewriter-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background-color: black;
+  animation: blink 1s step-end infinite;
+  margin-left: 2px;
+  vertical-align: middle;
+}
+
+@keyframes blink {
+  from, to { opacity: 1; }
+  50% { opacity: 0; }
+}

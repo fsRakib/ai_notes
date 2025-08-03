@@ -45,7 +45,7 @@ export const GetFileRecord = query({
       .filter((q) => q.eq(q.field("fileId"), args.fileId))
       .collect();
 
-    console.log("fileStorage.js result: ", result);
+    //console.log("fileStorage.js result: ", result);
 
     return result[0];
   },

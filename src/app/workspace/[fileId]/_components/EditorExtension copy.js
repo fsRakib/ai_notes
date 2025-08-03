@@ -31,145 +31,93 @@ function EditorExtension({ editor, setLink, pdfVisible, setPdfVisible }) {
     return marked.parse(markdown); // returns HTML string
   }
 
-  // Fixed typeWriterEffect function with proper bold heading support
+async function typeWriterEffect(editor, text, options = {}) {
+  const { delay = 10, initialDelay = 50, lineDelay = 20 } = options;
 
-  async function typeWriterEffect(editor, text, options = {}) {
-    const { delay = 10, initialDelay = 50, lineDelay = 20 } = options;
+  await new Promise((resolve) => setTimeout(resolve, initialDelay));
 
-    await new Promise((resolve) => setTimeout(resolve, initialDelay));
+  const lines = text.split("\n");
+  let inList = false;
+  let currentNestLevel = 0;
 
-    // Helper function for inserting bold content with typewriter effect
-    async function insertBoldContentWithDelay(editor, text, delay) {
-      try {
-        // Move cursor to current position and start bold formatting
-        editor.chain().focus().run();
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
 
-        // Insert bold content using HTML approach for better compatibility
-        const boldHtml = `<strong>${text}</strong>`;
-
-        // For typewriter effect with bold, we need to insert character by character
-        // while maintaining the bold formatting
-        for (let i = 0; i < text.length; i++) {
-          // Insert each character wrapped in strong tags
-          editor.commands.insertContent(`<strong>${text[i]}</strong>`);
-          await new Promise((resolve) => setTimeout(resolve, delay));
-        }
-      } catch (error) {
-        console.error("Bold insertion error:", error);
-        // Fallback: Insert complete bold text at once
-        editor.commands.insertContent(`<strong>${text}</strong>`);
-      }
-    }
-
-    // Helper function for regular content insertion
-    async function insertContentWithDelay(editor, text, delay) {
-      for (let i = 0; i < text.length; i++) {
-        editor.commands.insertContent(text[i]);
-        await new Promise((resolve) => setTimeout(resolve, delay));
-      }
-    }
-
-    const lines = text.split("\n");
-    let inList = false;
-    let currentNestLevel = 0;
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
-
-      if (!line) {
-        // Handle empty lines
-        if (inList) {
-          editor.commands.enter();
-          await new Promise((resolve) => setTimeout(resolve, lineDelay));
-        }
-        continue;
-      }
-
-      // FIXED: Better detection for bold headings
-      const isBoldMarkdownHeading = /^\*\*(.+?)\*\*$/.test(line);
-      const isColonHeading =
-        line.endsWith(":") && !line.startsWith("-") && !line.startsWith("--");
-      const isHeading = isBoldMarkdownHeading || isColonHeading;
-
-      if (isHeading) {
-        // Exit list if we're in one
-        if (inList) {
-          editor.commands.toggleBulletList();
-          inList = false;
-          currentNestLevel = 0;
-
-          // Add extra line break after exiting list before heading
-          editor.commands.enter();
-          await new Promise((resolve) => setTimeout(resolve, lineDelay));
-        }
-
-        // FIXED: Extract heading text properly
-        let headingText;
-        if (isBoldMarkdownHeading) {
-          // Extract text from **text** format
-          headingText = line.replace(/^\*\*(.+?)\*\*$/, "$1").trim();
-        } else {
-          // Remove colon from colon headings
-          headingText = line.replace(/:$/, "").trim();
-        }
-
-        //console.log("Processing heading:", headingText); // Debug log
-
-        // Insert heading with bold formatting
-        await insertBoldContentWithDelay(editor, headingText, delay);
-
-        // Add line break if there are more lines
-        if (i < lines.length - 1) {
-          editor.commands.enter();
-          await new Promise((resolve) => setTimeout(resolve, lineDelay));
-        }
-        continue;
-      }
-
-      // Handle list items (existing logic)
-      const listMatch = line.match(/^(-+)\s/);
-      const targetNestLevel = listMatch ? listMatch[1].length : 0;
-
-      if (listMatch) {
-        // FIXED: Reset list state properly when starting new list
-        if (!inList) {
-          // Ensure we're not in any previous formatting context
-          editor.commands.clearNodes();
-          editor.commands.toggleBulletList();
-          inList = true;
-          currentNestLevel = 1;
-        } else {
-          editor.commands.enter();
-        }
-
-        // Adjust nesting level
-        while (currentNestLevel < targetNestLevel) {
-          editor.commands.sinkListItem("listItem");
-          currentNestLevel++;
-        }
-        while (currentNestLevel > targetNestLevel) {
-          editor.commands.liftListItem("listItem");
-          currentNestLevel--;
-        }
-
-        const content = line.slice(listMatch[0].length);
-        await insertContentWithDelay(editor, content, delay);
-        continue;
-      }
-
-      // Regular content
+    if (!line) {
+      // Skip empty lines unless we're in a list
       if (inList) {
-        // Exit list for non-list content
-        editor.commands.toggleBulletList();
-        inList = false;
-        currentNestLevel = 0;
-
-        // Add line break after exiting list
         editor.commands.enter();
         await new Promise((resolve) => setTimeout(resolve, lineDelay));
       }
+      continue;
+    }
 
-      // Insert regular paragraph content
+    // Detect bold headings (lines that are standalone and not part of lists)
+    const isHeading =
+      (!inList && line.startsWith("**") && line.endsWith("**")) ||
+      (line.endsWith(":") && !line.startsWith("-") && !line.startsWith("--"));
+
+    if (isHeading) {
+      // Exit list if we're in one
+      if (inList) {
+        editor.commands.toggleBulletList();
+        inList = false;
+        currentNestLevel = 0;
+      }
+
+      // Clean heading text (remove ** markers if present)
+      const headingText = line.replace(/\*\*/g, "").trim();
+
+      // Apply bold formatting
+      editor.commands.toggleBold();
+      await insertContentWithDelay(editor, headingText, delay);
+      editor.commands.toggleBold();
+
+      // Add line break
+      if (i < lines.length - 1) {
+        editor.commands.enter();
+        await new Promise((resolve) => setTimeout(resolve, lineDelay));
+      }
+      continue;
+    }
+
+    // Detect list items
+    const listMatch = line.match(/^(-+)\s/);
+    const targetNestLevel = listMatch ? listMatch[1].length : 0;
+
+    if (listMatch) {
+      // Start list if not in one
+      if (!inList) {
+        editor.commands.toggleBulletList();
+        inList = true;
+        currentNestLevel = 1;
+      } else {
+        // New item in existing list
+        editor.commands.enter();
+      }
+
+      // Adjust nesting level
+      while (currentNestLevel < targetNestLevel) {
+        editor.commands.sinkListItem("listItem");
+        currentNestLevel++;
+      }
+      while (currentNestLevel > targetNestLevel) {
+        editor.commands.liftListItem("listItem");
+        currentNestLevel--;
+      }
+
+      // Insert the content
+      const content = line.slice(listMatch[0].length);
+      await insertContentWithDelay(editor, content, delay);
+      continue;
+    }
+
+    // Regular content
+    if (inList) {
+      // Continue in list context
+      await insertContentWithDelay(editor, line, delay);
+    } else {
+      // Regular paragraph
       await insertContentWithDelay(editor, line, delay);
       if (i < lines.length - 1) {
         editor.commands.enter();
@@ -177,43 +125,8 @@ function EditorExtension({ editor, setLink, pdfVisible, setPdfVisible }) {
       }
     }
   }
+}
 
-  // Alternative approach - if the above doesn't work well, try this simpler version:
-  async function typeWriterEffectAlternative(editor, text, options = {}) {
-    const { delay = 10, initialDelay = 50, lineDelay = 20 } = options;
-
-    await new Promise((resolve) => setTimeout(resolve, initialDelay));
-
-    const lines = text.split("\n");
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
-
-      if (!line) continue;
-
-      // Check if line is a bold heading
-      const boldMatch = line.match(/^\*\*(.+?)\*\*$/);
-
-      if (boldMatch) {
-        const headingText = boldMatch[1];
-
-        // Insert bold heading all at once (simpler approach)
-        editor.commands.insertContent(`<p><strong>${headingText}</strong></p>`);
-      } else {
-        // Handle regular content and lists as before
-        await insertContentWithDelay(editor, line, delay);
-
-        if (i < lines.length - 1) {
-          editor.commands.enter();
-          await new Promise((resolve) => setTimeout(resolve, lineDelay));
-        }
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, lineDelay));
-    }
-  }
-
-  // Helper function (keep this in your component)
   async function insertContentWithDelay(editor, text, delay) {
     for (let i = 0; i < text.length; i++) {
       editor.commands.insertContent(text[i]);

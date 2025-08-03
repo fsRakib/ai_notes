@@ -13,10 +13,10 @@ export default function DashboardClient({ sharedRooms }) {
   });
 
   return (
-    <div className="p-4">
+    <div className="p-4 ">
       <h2 className="text-3xl font-medium">Workspace</h2>
       {/* Created Documents */}
-      <div className="mt-10 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-10 gap-5">
+      <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {fileList === undefined ? (
           Array.from({
             length: (sharedRooms?.length || 0) > 0 ? sharedRooms.length : 3,
@@ -30,7 +30,7 @@ export default function DashboardClient({ sharedRooms }) {
           fileList.map((file) => (
             <div
               key={file.fileId}
-              className="shadow-lg p-4 rounded-lg  items-center border-red-400 border-2 "
+              className="shadow-lg p-4 rounded-lg bg-stone-200  items-center border-red-400 border-2 "
             >
               <Link
                 href={`/workspace/${file.fileId}`}
@@ -51,11 +51,11 @@ export default function DashboardClient({ sharedRooms }) {
       {/* Shared Documents */}
       <div className="mt-16">
         <h3 className="text-xl font-semibold mb-4">Shared With You</h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-10 gap-5">
+        <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {sharedRooms && sharedRooms.length > 0 ? (
             sharedRooms.map((room) => (
               <Link key={room.id} href={`/workspace/${room.id}`}>
-                <div className="cursor-pointer shadow-lg p-4 rounded-lg flex flex-col items-center border-blue-700 border-2">
+                <div className="cursor-pointer shadow-lg p-4 rounded-lg flex flex-col items-center bg-stone-200 border-blue-700 border-2">
                   <Image
                     src="/pdf.png"
                     width={50}

@@ -3,7 +3,7 @@ import React from "react";
 
 function Header() {
   return (
-    <div className="flex justify-end p-2 shadow-md">
+    <div className="flex justify-end p-2 shadow-2xl rounded-b-xl">
       <UserButton
         appearance={{
           elements: {

@@ -19,7 +19,7 @@ function SideBar() {
     userEmail: user?.primaryEmailAddress?.emailAddress,
   });
   return (
-    <div className="shadow-md h-screen  p-7">
+    <div className="shadow-md h-screen  p-7 rounded-xl">
       <div className=" w-full justify-center flex">
         <Image src="/logo.png" width={120} height={120} alt="logo" />
       </div>
@@ -31,15 +31,15 @@ function SideBar() {
       </div>
       <Link href="/dashboard">
         <div
-          className={` flex gap-2 items-center p-3 mt-5 hover:bg-slate-100 cursor-pointer ${path == "/dashboard" && "bg-slate-200"}`}
+          className={` flex gap-2 items-center p-3 mt-5 hover:bg-stone-200 cursor-pointer ${path == "/dashboard" && "bg-stone-200"}`}
         >
           <Layout />
-          <h2 >Workspace</h2>
+          <h2>Workspace</h2>
         </div>
       </Link>
       <Link href="/dashboard/chat">
         <div
-          className={`flex gap-2 items-center p-3 mt-1 hover:bg-slate-100 cursor-pointer ${path == "/dashboard/upgrade" && "bg-slate-200"}`}
+          className={`flex gap-2 items-center p-3 mt-1 hover:bg-stone-200 cursor-pointer ${path == "/dashboard/upgrade" && "bg-stone-200"}`}
         >
           <BotMessageSquareIcon />
           <h2>Chat</h2>
@@ -47,7 +47,7 @@ function SideBar() {
       </Link>
       <Link href="/dashboard/upgrade">
         <div
-          className={`flex gap-2 items-center p-3 mt-1 hover:bg-slate-100 cursor-pointer ${path == "/dashboard/upgrade" && "bg-slate-200"}`}
+          className={`flex gap-2 items-center p-3 mt-1 hover:bg-stone-200 cursor-pointer ${path == "/dashboard/upgrade" && "bg-stone-200"}`}
         >
           <Shield />
           <h2>Upgrade</h2>
